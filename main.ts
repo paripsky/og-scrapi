@@ -1,25 +1,43 @@
 import { Application, Router } from "https://deno.land/x/oak@v11.1.0/mod.ts";
 import { oakCors } from "https://deno.land/x/cors@v1.2.2/mod.ts";
-import data from "./data.json" assert { type: "json" };
+import { DOMParser } from "https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts";
+
+const getMetaFromURL = async (url) => {
+  try {
+    const res = await fetch(url);
+    const html = await res.text();
+    const document = new DOMParser().parseFromString(html, "text/html");
+    const metaTags = document.querySelectorAll('meta');
+    const documentMeta = Array.from(metaTags)
+      .reduce((acc, meta) => {
+        const property = meta.getAttribute('property');
+        const name = meta.getAttribute('name');
+        const content = meta.getAttribute('content');
+
+        if (!property && !name) return acc;
+
+        acc[property ?? name] = content;
+        return acc;
+      }, {});
+
+    return documentMeta;
+  } catch (err) {
+    console.error(err);
+  }
+}
 
 const router = new Router();
 router
   .get("/", (context) => {
-    context.response.body = "Welcome to dinosaur API!";
+    context.response.body = "Welcome to meta tags API!";
   })
-  .get("/api", (context) => {
-    context.response.body = data;
-  })
-  .get("/api/:dinosaur", (context) => {
-    if (context?.params?.dinosaur) {
-      const found = data.find((item) =>
-        item.name.toLowerCase() === context.params.dinosaur.toLowerCase()
-      );
-      if (found) {
-        context.response.body = found;
-      } else {
-        context.response.body = "No dinosaurs found.";
-      }
+  .get("/api/meta", async (context) => {
+    const url = context.request.url.searchParams.get('url');
+
+    if (url) {
+      context.response.body = await getMetaFromURL(url);
+    } else {
+      context.response.body = "Missing url";
     }
   });
 
