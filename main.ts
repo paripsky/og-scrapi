@@ -8,6 +8,7 @@ const getMetaFromURL = async (url) => {
     const html = await res.text();
     const document = new DOMParser().parseFromString(html, "text/html");
     const metaTags = document.querySelectorAll('meta');
+    const titleTag = document.querySelector('title');
     const documentMeta = Array.from(metaTags)
       .reduce((acc, meta) => {
         const property = meta.getAttribute('property');
@@ -19,6 +20,8 @@ const getMetaFromURL = async (url) => {
         acc[property ?? name] = content;
         return acc;
       }, {});
+
+    documentMeta.title = titleTag.textContent;
 
     return documentMeta;
   } catch (err) {
