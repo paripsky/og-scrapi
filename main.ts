@@ -2,9 +2,13 @@ import { Application, Router } from "https://deno.land/x/oak@v11.1.0/mod.ts";
 import { oakCors } from "https://deno.land/x/cors@v1.2.2/mod.ts";
 import { DOMParser } from "https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts";
 
+const acceptHeader = 'text/html,application/xhtml+xml,application/xml';
+
 const getMetaFromURL = async (url) => {
   try {
-    const res = await fetch(url);
+    const headers = new Headers();
+    headers.set('accept', acceptHeader);
+    const res = await fetch(url, { headers });
     const html = await res.text();
     const document = new DOMParser().parseFromString(html, "text/html");
     const metaTags = document.querySelectorAll('meta');
