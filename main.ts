@@ -1,56 +1,55 @@
-import { Application, Router } from "https://deno.land/x/oak@v11.1.0/mod.ts";
-import { oakCors } from "https://deno.land/x/cors@v1.2.2/mod.ts";
-import { DOMParser } from "https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts";
+import { DOMParser, Element } from "jsr:@b-fuze/deno-dom";
 
-const acceptHeader = 'text/html,application/xhtml+xml,application/xml';
-
-const getMetaFromURL = async (url) => {
+const getMetaTags = async (url: string) => {
   try {
     const headers = new Headers();
-    headers.set('accept', acceptHeader);
+    headers.set("accept", "text/html,application/xhtml+xml,application/xml");
     const res = await fetch(url, { headers });
     const html = await res.text();
     const document = new DOMParser().parseFromString(html, "text/html");
-    const metaTags = document.querySelectorAll('meta');
-    const titleTag = document.querySelector('title');
+    const metaTags = document.querySelectorAll("meta");
+    const titleTag = document.querySelector("title");
     const documentMeta = Array.from(metaTags)
       .reduce((acc, meta) => {
-        const property = meta.getAttribute('property');
-        const name = meta.getAttribute('name');
-        const content = meta.getAttribute('content');
+        const el = meta as Element;
+        const property = el.getAttribute("property");
+        const name = el.getAttribute("name");
+        const content = el.getAttribute("content");
 
-        if (!property && !name) return acc;
+        if (!content) return acc;
+        if (property) acc[property] = content;
+        if (name) acc[name] = content;
 
-        acc[property ?? name] = content;
         return acc;
-      }, {});
+      }, {} as Record<string, string>);
 
-    documentMeta.title = titleTag.textContent;
+    if (titleTag) documentMeta.title = titleTag.textContent;
 
     return documentMeta;
   } catch (err) {
     console.error(err);
   }
-}
+};
 
-const router = new Router();
-router
-  .get("/", (context) => {
-    context.response.body = "Welcome to meta tags API!";
-  })
-  .get("/api/meta", async (context) => {
-    const url = context.request.url.searchParams.get('url');
+Deno.serve({ port: 8000 }, async (request: Request): Promise<Response> => {
+  const headers = new Headers();
+  headers.set("Access-Control-Allow-Origin", "*");
+  const url = new URL(request.url);
 
-    if (url) {
-      context.response.body = await getMetaFromURL(url);
-    } else {
-      context.response.body = "Missing url";
-    }
-  });
+  if (request.method === "GET" && url.pathname === "/api/meta") {
+    const urlToFetch = url.searchParams.get("url");
 
-const app = new Application();
-app.use(oakCors()); // Enable CORS for All Routes
-app.use(router.routes());
-app.use(router.allowedMethods());
+    if (!urlToFetch) throw new Error(`missing url query param`);
 
-await app.listen({ port: 8000 });
+    const metaTags = await getMetaTags(urlToFetch);
+    return new Response(JSON.stringify(metaTags), { status: 200, headers });
+  }
+
+  if (request.method === "GET" && url.pathname === "/") {
+    return new Response("OK", { status: 200, headers });
+  }
+
+  return new Response("not found", { status: 404, headers });
+});
+
+console.log(`HTTP server running. Access it at: http://localhost:8000/`);
