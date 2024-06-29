@@ -1,6 +1,8 @@
 # OG Scrapi
 
-OG Scrapi is a Deno API that retrieves Open Graph (OG) meta tags and other metadata from a given URL, providing a convenient way to access and utilize website metadata.
+OG Scrapi is a Deno API that retrieves Open Graph (OG) meta tags and other
+metadata from a given URL, providing a convenient way to access and utilize
+website metadata.
 
 ## Getting Started
 
@@ -29,7 +31,8 @@ OG Scrapi is a Deno API that retrieves Open Graph (OG) meta tags and other metad
 
 - `GET /`: Welcome message.
 
-- `GET /api/meta?url=<URL>`: Get Open Graph (OG) meta tags and other metadata from the specified URL.
+- `GET /api/meta?url=<URL>`: Get Open Graph (OG) meta tags and other metadata
+  from the specified URL.
 
 #### Example
 
@@ -43,23 +46,22 @@ Response:
 
 ```json
 {
-  "og:title": "Example",
-  "og:description": "An example website",
-  "og:image": "https://example.com/image.png",
-  "title": "Welcome to Example"
-  // ...other metadata
+   "og:title": "Example",
+   "og:description": "An example website",
+   "og:image": "https://example.com/image.png",
+   "title": "Welcome to Example"
+   // ...other metadata
 }
 ```
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
+for details.
 
 ## Acknowledgements
 
 - [Deno](https://deno.land/)
-- [oak](https://deno.land/x/oak)
-- [cors](https://deno.land/x/cors)
 - [deno_dom](https://deno.land/x/deno_dom)
 
 ## Contributing

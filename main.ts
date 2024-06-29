@@ -40,10 +40,18 @@ Deno.serve({ port: 8000 }, async (request: Request): Promise<Response> => {
   if (request.method === "GET" && url.pathname === "/api/meta") {
     const urlToFetch = url.searchParams.get("url");
 
-    if (!urlToFetch) throw new Error(`missing url query param`);
+    if (!urlToFetch) {
+      return new Response(
+        JSON.stringify({ error: "missing url query param" }),
+        { status: 400, headers },
+      );
+    }
 
     const metaTags = await getMetaTags(urlToFetch);
-    return new Response(JSON.stringify(metaTags), { status: 200, headers });
+    return new Response(
+      JSON.stringify(metaTags ?? { error: "something went wrong" }),
+      { status: metaTags ? 200 : 500, headers },
+    );
   }
 
   if (request.method === "GET" && url.pathname === "/") {
