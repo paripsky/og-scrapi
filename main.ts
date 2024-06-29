@@ -8,13 +8,11 @@ const getMetaTags = async (url: string) => {
     const html = await res.text();
     const document = new DOMParser().parseFromString(html, "text/html");
     const metaTags = document.querySelectorAll("meta");
-    const titleTag = document.querySelector("title");
-    const documentMeta = Array.from(metaTags)
+    const documentMeta = (Array.from(metaTags) as Element[])
       .reduce((acc, meta) => {
-        const el = meta as Element;
-        const property = el.getAttribute("property");
-        const name = el.getAttribute("name");
-        const content = el.getAttribute("content");
+        const property = meta.getAttribute("property");
+        const name = meta.getAttribute("name");
+        const content = meta.getAttribute("content");
 
         if (!content) return acc;
         if (property) acc[property] = content;
@@ -23,6 +21,7 @@ const getMetaTags = async (url: string) => {
         return acc;
       }, {} as Record<string, string>);
 
+    const titleTag = document.querySelector("title");
     if (titleTag) documentMeta.title = titleTag.textContent;
 
     return documentMeta;
