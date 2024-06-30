@@ -32,8 +32,8 @@ const getMetaTags = async (url: string) => {
 
 Deno.serve({ port: 8000 }, async (request: Request): Promise<Response> => {
   const headers = new Headers();
-  headers.set("Access-Control-Allow-Origin", "*");
   headers.set("Content-Type", "application/json");
+  headers.set("Access-Control-Allow-Origin", "*");
   const url = new URL(request.url);
 
   if (request.method === "GET" && url.pathname === "/api/meta") {
